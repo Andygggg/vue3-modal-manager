@@ -1,4 +1,4 @@
-# vue3-modal-manager
+# vue3-modal-manager[Demo](https://andygggg.github.io/vue3-modal-manager/)
 
 A flexible and extensible modal manager built with Vue 3 and TypeScript. This library allows you to dynamically render custom modals with fully configurable content and styles, making it easy to manage dialogs, popups, and overlay components in your Vue applications.
 
