@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A flexible and powerful modal manager for Vue 3",
   "author": "Andy Wu",
   "homepage": "https://github.com/Andygggg/vue3-modal-manager",
