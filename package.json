@@ -6,6 +6,11 @@
   "version": "1.1.0",
   "description": "A flexible and powerful modal manager for Vue 3",
   "author": "Andy Wu",
+  "homepage": "https://github.com/Andygggg/vue3-modal-manager",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Andygggg/vue3-modal-manager"
+  },
   "license": "MIT",
   "private": false,
   "main": "lib_dist/index.es.js",
@@ -38,6 +43,7 @@
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",
     "serve": "serve dist",
+    "deploy": "gh-pages -d dist",
     "preview": "vite preview",
     "build-only": "vite build",
     "build-lib": "run-p generate-types build-lib-only",
@@ -59,6 +65,7 @@
     "@vue/tsconfig": "^0.7.0",
     "eslint": "^9.22.0",
     "eslint-plugin-vue": "~10.0.0",
+    "gh-pages": "^6.3.0",
     "jiti": "^2.4.2",
     "npm-run-all2": "^7.0.2",
     "prettier": "3.5.3",
