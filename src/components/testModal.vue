@@ -44,6 +44,9 @@ const closeModal = () => {
   backdrop-filter: blur(10px);
   padding: 1rem;
   box-sizing: border-box; /* 確保邊框和內邊距不會改變元素的實際寬高 */
+  box-shadow:
+    rgba(0, 0, 0, 0.3) 0px 19px 38px,
+    rgba(0, 0, 0, 0.22) 0px 15px 12px;
 }
 
 .header_row {

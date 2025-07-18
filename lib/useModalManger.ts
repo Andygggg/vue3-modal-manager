@@ -99,11 +99,8 @@ export class ModalManager {
     container.style.left = `${centerX}px`
     container.style.top = `${centerY}px`
     container.style.transform = 'translate(-50%, -50%)'
-    container.style.width = 'max-content'
-    container.style.height = 'max-content'
-    container.style.borderRadius = '10px'
-    container.style.boxShadow =
-      'rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px'
+    container.style.width = 'auto'
+    container.style.height = 'auto'
     return container
   }
 
@@ -379,12 +376,9 @@ export class ModalManager {
       if (modal.id === modalId) {
         // 將當前點擊的 modal 設置為最高層
         modal.container.style.zIndex = `${highestZIndex}`
-        modal.container.style.boxShadow =
-          'rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px'
       } else if (modalZIndex > currentZIndex) {
         // 將其他較高層的 modal 降低一層
         modal.container.style.zIndex = `${modalZIndex - 1}`
-        modal.container.style.boxShadow = ''
       }
     })
   }
