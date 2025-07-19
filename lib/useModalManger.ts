@@ -2,7 +2,7 @@ import { createVNode, render } from 'vue'
 import { ModalResize } from './ModalResize'
 
 import type { App, AppContext } from 'vue'
-import type { ModalRouter, modalInfo, modalParams, createPosition, movingPosition } from './typing'
+import type { ModalRouter, modalInfo, modalParams, createPosition, fixedModalPosition, movingPosition } from './typing'
 
 enum ModalType {
   FIXED, // 固定modal
@@ -62,22 +62,55 @@ export class ModalManager {
   /**
    * 建立modal div(固定)元素
    * @param modalId modal ID
+   * @param fixedPosition 固定位置
    * @returns HTMLDivElement
    */
-  private createDivByFixed(modalId: string): HTMLDivElement {
+
+  private createDivByFixed(modalId: string, fixedPosition: fixedModalPosition = 'center'): HTMLDivElement {
     const container = document.createElement('div')
     container.setAttribute('data-modalId', modalId)
     container.style.position = 'fixed'
     container.style.zIndex = '1000'
-    container.style.top = '50%'
-    container.style.left = '50%'
-    container.style.transform = 'translate(-50%, -50%)'
     container.style.width = '100%'
     container.style.height = '100%'
     container.style.display = 'flex'
-    container.style.alignItems = 'center'
-    container.style.justifyContent = 'center'
     container.style.backgroundColor = 'rgba(0, 0, 0, 0.6)'
+    
+    // 根據位置設定 flex 對齊方式
+    switch (fixedPosition) {
+      case 'center':
+        container.style.top = '50%'
+        container.style.left = '50%'
+        container.style.transform = 'translate(-50%, -50%)'
+        container.style.alignItems = 'center'
+        container.style.justifyContent = 'center'
+        break
+      case 'top':
+        container.style.top = '0'
+        container.style.left = '0'
+        container.style.alignItems = 'flex-start'
+        container.style.justifyContent = 'center'
+        break
+      case 'bottom':
+        container.style.top = '0'
+        container.style.left = '0'
+        container.style.alignItems = 'flex-end'
+        container.style.justifyContent = 'center'
+        break
+      case 'left':
+        container.style.top = '0'
+        container.style.left = '0'
+        container.style.alignItems = 'center'
+        container.style.justifyContent = 'flex-start'
+        break
+      case 'right':
+        container.style.top = '0'
+        container.style.left = '0'
+        container.style.alignItems = 'center'
+        container.style.justifyContent = 'flex-end'
+        break
+    }
+    
     return container
   }
 
@@ -178,8 +211,9 @@ export class ModalManager {
       const modalId = this.generateId(name)
 
       // 根據類型創建不同的容器
-      const container =
-        type === 0 ? this.createDivByFixed(modalId) : this.createDraggableDiv(modalId)
+      const container = type === 0 
+        ? this.createDivByFixed(modalId, params?.fixedPosition || 'center') 
+        : this.createDraggableDiv(modalId)
 
       // 3. 處理容器的附加位置
       const box = params?.id ? document.getElementById(params.id) : null

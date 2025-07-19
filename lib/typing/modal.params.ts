@@ -34,7 +34,8 @@ export interface modalInfo {
  * modal參數
  * @property {boolean} drag 是否啟用拖曳功能
  * @property {string} id modal ID
- * @property {createPosition} position modal位置
+ * @property {createPosition} position modal位置（僅用於懸浮模式）
+ * @property {fixedModalPosition} fixedPosition 固定視窗位置（僅用於固定模式）
  * @property {Record<string, any>} props modal參數
  * @property {Record<string, (...args: any[]) => void>} events modal事件
  * @property {boolean} resize 是否啟用調整大小功能
@@ -44,6 +45,7 @@ export interface modalParams {
   drag?: boolean
   resize?: boolean
   position?: createPosition
+  fixedPosition?: fixedModalPosition
   props?: Record<string, any>
   events?: Record<string, (...args: any[]) => void>
 }
@@ -61,6 +63,11 @@ export interface createPosition {
   top?: string
   bottom?: string
 }
+
+/**
+ * 固定視窗位置類型
+ */
+export type fixedModalPosition = 'center' | 'top' | 'bottom' | 'left' | 'right'
 
 /**
  * 移動位置

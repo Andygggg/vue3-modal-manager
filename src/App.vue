@@ -211,6 +211,7 @@ const multipleModalIds = ref<string[]>([])
 // 1. 開啟固定式 Modal
 const openFixedModal = async () => {
   const result = await modalManager.openModal('test', {
+    fixedPosition: 'right',
     props: {
       title: '固定式 Modal',
       content: '這是一個固定位置的彈窗，會有全屏遮罩效果',
