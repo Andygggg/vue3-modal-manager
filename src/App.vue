@@ -5,7 +5,7 @@
       <div class="container">
         <h1 class="title">
           <span class="icon">🚀</span>
-          Modal Manager Demo
+          Vue3-Modal-Manager Demo
         </h1>
         <p class="subtitle">Vue3 + TypeScript modal管理系統</p>
       </div>
