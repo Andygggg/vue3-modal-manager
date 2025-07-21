@@ -1,0 +1,110 @@
+# 進階版 GitHub Actions workflow
+name: Build and Deploy
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
+
+jobs:
+  # 測試和構建作業
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20, 22]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.yarn
+            node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Run ESLint
+        run: yarn lint
+
+      - name: Run type check
+        run: yarn type-check
+
+      - name: Format check
+        run: yarn format --check || (echo "Code is not formatted. Run 'yarn format' to fix." && exit 1)
+
+      # 只在 Node.js 22 和 main 分支時構建
+      - name: Build demo project
+        if: matrix.node-version == 22 && github.ref == 'refs/heads/main'
+        run: yarn build
+        env:
+          NODE_ENV: production
+
+      - name: Build library
+        if: matrix.node-version == 22
+        run: yarn build-lib
+
+      # 上傳構建產物（只在部署時）
+      - name: Setup Pages
+        if: matrix.node-version == 22 && github.ref == 'refs/heads/main'
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages artifact
+        if: matrix.node-version == 22 && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+      # 上傳庫文件產物
+      - name: Upload library artifacts
+        if: matrix.node-version == 22
+        uses: actions/upload-artifact@v4
+        with:
+          name: library-dist-node-${{ matrix.node-version }}
+          path: lib_dist/
+          retention-days: 7
+
+  # 部署作業（只在 main 分支）
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: test-and-build
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Comment deployment URL
+        if: github.event_name == 'push'
+        run: |
+          echo "🚀 Deployment successful!"
+          echo "📦 Demo URL: ${{ steps.deployment.outputs.page_url }}"
