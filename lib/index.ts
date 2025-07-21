@@ -1,2 +1,2 @@
-export { createModalManager, useModalManager } from './useModalManger'
-export * from './typing'
+export { createModalManager, useModalManager } from './core/ModalManager'
+export * from './types'

@@ -1,649 +1,742 @@
 <template>
-  <div class="demo-container">
-    <header class="demo-header">
-      <h1>Modal Manager Demo</h1>
-      <p>Vue3 + TypeScript</p>
+  <div class="app-container">
+    <!-- 頁面標題 -->
+    <header class="header">
+      <div class="container">
+        <h1 class="title">
+          <span class="icon">🚀</span>
+          Modal Manager Demo
+        </h1>
+        <p class="subtitle">Vue3 + TypeScript modal管理系統</p>
+      </div>
     </header>
 
-    <div class="demo-content">
-      <!-- 1. 固定式 Modal -->
-      <section class="demo-section">
-        <div class="section-header">
-          <h2>1. 固定式 Modal</h2>
-          <p>居中顯示，固定位置</p>
-        </div>
+    <!-- 主要內容容器 (帶有 overflow) -->
+    <div class="content-wrapper">
+      <main class="main-content">
+        <div class="container">
+          <!-- 控制面板 -->
+          <div class="control-panel">
+            <div class="panel-section">
+              <h3 class="section-title">📌 固定modal (Fixed Modal)</h3>
+              <p class="section-description">固定在指定位置顯示，帶有遮罩層</p>
+              <div class="button-group">
+                <button
+                  v-for="position in fixedPositions"
+                  :key="position.value"
+                  @click="openFixedModal(position.value)"
+                  class="btn btn-primary"
+                >
+                  {{ position.label }}
+                </button>
+              </div>
+            </div>
 
-        <div class="demo-controls">
-          <button class="btn btn-primary" @click="openFixedModal"> 開啟固定式 Modal </button>
-        </div>
+            <div class="panel-section">
+              <h3 class="section-title">🎯 可拖拽modal (Draggable Modal)</h3>
+              <p class="section-description">提供靈活的交互體驗，支援拖拽移動和調整大小</p>
+              <div class="button-group">
+                <button @click="openDraggableModal()" class="btn btn-success"> 基礎modal </button>
+                <button @click="openDraggableModal({ drag: true })" class="btn btn-success">
+                  啟用拖拽
+                </button>
+                <button @click="openDraggableModal({ resize: true })" class="btn btn-success">
+                  啟用調整大小
+                </button>
+                <button
+                  @click="openDraggableModal({ drag: true, resize: true })"
+                  class="btn btn-success"
+                >
+                  拖拽 + 調整大小
+                </button>
+              </div>
+            </div>
 
-        <div class="code-example">
-          <h4>程式碼用法：</h4>
-          <pre><code>// 開啟固定式 Modal
-const openFixedModal = async () => {
-  const result = await modalManager.openModal('test', {
-    props: { title: '固定式 Modal', content: '這是一個固定位置的視窗' }
-  })
-  console.log('Modal 開啟結果:', result)
-}</code></pre>
-        </div>
-      </section>
+            <div class="panel-section">
+              <h3 class="section-title">⚙️ 進階功能</h3>
+              <p class="section-description">展示更多高級功能和自定義選項</p>
+              <div class="button-group">
+                <button @click="openCustomPositionModal()" class="btn btn-warning">
+                  自訂位置
+                </button>
+                <button @click="openModalWithEvents()" class="btn btn-warning"> 自訂事件 </button>
+                <button @click="openModalInContainer()" class="btn btn-warning"> 指定容器 </button>
+                <button @click="openMultipleModals()" class="btn btn-info"> 開啟多個modal </button>
+              </div>
+            </div>
 
-      <!-- 2. 拖曳式 Modal (基礎功能) -->
-      <section class="demo-section">
-        <div class="section-header">
-          <h2>2. 拖曳式 Modal (基礎功能)</h2>
-          <p>懸浮視窗，可配置拖曳和縮放功能</p>
-        </div>
-
-        <div class="demo-controls">
-          <div class="checkbox-group">
-            <label> <input type="checkbox" v-model="dragOptions.drag" /> 啟用拖曳 </label>
-            <label> <input type="checkbox" v-model="dragOptions.resize" /> 啟用縮放 </label>
+            <div class="panel-section">
+              <h3 class="section-title">🛠️ 管理操作</h3>
+              <p class="section-description">modal的管理和監控功能</p>
+              <div class="button-group">
+                <button @click="showModalList()" class="btn btn-secondary"> 查看所有modal </button>
+                <button @click="closeAllModals()" class="btn btn-danger"> 關閉所有modal </button>
+              </div>
+            </div>
           </div>
-          <button class="btn btn-success" @click="openDraggableModal"> 開啟拖曳式 Modal </button>
-        </div>
 
-        <div class="code-example">
-          <h4>程式碼用法：</h4>
-          <pre><code>// 開啟可拖曳的 Modal
-const openDraggableModal = async () => {
-  const result = await modalManager.openPopover('test', {
-    props: { 
-      title: '拖曳式 Modal', 
-      content: '這是一個可拖曳的視窗',
-      showDragHandle: true 
-    },
-    drag: {{ dragOptions.drag }},
-    resize: {{ dragOptions.resize }}
-  })
-}</code></pre>
-        </div>
-      </section>
-
-      <!-- 3. 拖曳綁定/解除 -->
-      <section class="demo-section">
-        <div class="section-header">
-          <h2>3. 動態拖曳控制</h2>
-          <p>動態綁定和解除拖曳功能</p>
-        </div>
-
-        <div class="demo-controls">
-          <button class="btn btn-warning" @click="openModalWithDragControl">
-            開啟可控制拖曳的 Modal
-          </button>
-          <div class="control-buttons" v-if="currentDragModalId">
-            <button class="btn btn-sm btn-success" @click="bindDrag"> 綁定拖曳 </button>
-            <button class="btn btn-sm btn-danger" @click="unbindDrag"> 解除拖曳 </button>
-          </div>
-        </div>
-
-        <div class="code-example">
-          <h4>程式碼用法：</h4>
-          <pre><code>// 動態綁定拖曳
-const bindDrag = () => {
-  modalManager.bindDrag(currentDragModalId.value)
-}
-
-// 動態解除拖曳
-const unbindDrag = () => {
-  modalManager.unbindDrag(currentDragModalId.value)
-}</code></pre>
-        </div>
-      </section>
-
-      <!-- 4. 移動圖層 -->
-      <section class="demo-section">
-        <div class="section-header">
-          <h2>4. 移動圖層功能</h2>
-          <p>將 Modal 移動到指定的容器中</p>
-        </div>
-
-        <div class="demo-controls">
-          <button class="btn btn-info" @click="openModalForLayerMove">
-            開啟 Modal (準備移動)
-          </button>
-          <div class="control-buttons" v-if="layerMoveModalId">
-            <button class="btn btn-sm btn-primary" @click="moveToContainer1"> 移動到容器1 </button>
-            <button class="btn btn-sm btn-secondary" @click="moveToContainer2">
-              移動到容器2
-            </button>
+          <!-- 指定容器示例 -->
+          <div class="demo-container-section">
+            <h3 class="container-title">📦 自訂容器示範</h3>
+            <p class="container-description">modal可以在下方容器中開啟，展示容器內的modal功能</p>
+            <div id="custom-container" class="custom-container">
+              <div class="container-content">
+                <h4 class="content-title">🎯 目標容器</h4>
+                <p class="content-text">點擊上方「指定容器」按鈕，modal將在此容器中開啟</p>
+              </div>
+            </div>
           </div>
         </div>
-
-        <div class="layer-containers">
-          <div id="container1" class="layer-container">
-            <h4>容器 1</h4>
-            <p>Modal 可以移動到這裡</p>
-          </div>
-          <div id="container2" class="layer-container">
-            <h4>容器 2</h4>
-            <p>或者移動到這裡</p>
-          </div>
-        </div>
-
-        <div class="code-example">
-          <h4>程式碼用法：</h4>
-          <pre><code>// 移動 Modal 到指定容器
-const moveToContainer1 = () => {
-  modalManager.moveToLayers(layerMoveModalId.value, 'container1')
-}
-
-const moveToContainer2 = () => {
-  modalManager.moveToLayers(layerMoveModalId.value, 'container2')
-}</code></pre>
-        </div>
-      </section>
-
-      <!-- 5. 多個拖曳式 Modal -->
-      <section class="demo-section">
-        <div class="section-header">
-          <h2>5. 多個拖曳式 Modal</h2>
-          <p>同時開啟多個可拖曳的視窗</p>
-        </div>
-
-        <div class="demo-controls">
-          <button class="btn btn-purple" @click="openMultipleModals"> 開啟多個 Modal </button>
-          <button class="btn btn-danger" @click="closeAllModals"> 關閉所有 Modal </button>
-        </div>
-
-        <div class="modal-list" v-if="multipleModalIds.length > 0">
-          <h4>已開啟的 Modal：</h4>
-          <div class="modal-item" v-for="(modalId, index) in multipleModalIds" :key="modalId">
-            <span>Modal {{ index + 1 }}: {{ modalId }}</span>
-            <button class="btn btn-sm btn-danger" @click="closeSpecificModal(modalId)">
-              關閉
-            </button>
-          </div>
-        </div>
-
-        <div class="code-example">
-          <h4>程式碼用法：</h4>
-          <pre><code>// 開啟多個 Modal
-const openMultipleModals = async () => {
-  for (let i = 1; i ＜＜= 3; i++) {
-    const result = await modalManager.openPopovers('test', {
-      props: { 
-        title: `Modal ${i}`, 
-        content: `這是第 ${i} 個視窗`,
-        showDragHandle: true 
-      },
-      drag: true,
-      position: {
-        top: `${50 + i * 30}px`,
-        left: `${100 + i * 50}px`
-      }
-    })
-    if (result.success) {
-      multipleModalIds.value.push(result.modalId)
-    }
-  }
-}
-
-// 關閉所有 Modal
-const closeAllModals = () => {
-  modalManager.removeAllModal()
-  multipleModalIds.value = []
-}</code></pre>
-        </div>
-      </section>
+      </main>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import { useModalManager } from '../lib'
+import type { modalDirection, draggableModalParams } from '../lib'
 
-// Modal Manager 實例
+// modal管理器
 const modalManager = useModalManager()
 
-// 響應式數據
-const dragOptions = ref({
-  drag: true,
-  resize: true,
-})
+// 固定modal位置選項
+const fixedPositions = [
+  { label: '居中', value: 'center' as modalDirection },
+  { label: '頂部', value: 'top' as modalDirection },
+  { label: '底部', value: 'bottom' as modalDirection },
+  { label: '左側', value: 'left' as modalDirection },
+  { label: '右側', value: 'right' as modalDirection },
+]
 
-const currentDragModalId = ref<string>('')
-const layerMoveModalId = ref<string>('')
-const multipleModalIds = ref<string[]>([])
-
-// 1. 開啟固定式 Modal
-const openFixedModal = async () => {
-  const result = await modalManager.openModal('test', {
-    props: {
-      title: '固定式 Modal',
-      content: '這是一個固定位置的彈窗，會有全屏遮罩效果',
-    },
-  })
-  console.log('Fixed Modal 開啟結果:', result)
-}
-
-// 2. 開啟拖曳式 Modal
-const openDraggableModal = async () => {
-  const result = await modalManager.openPopover('test', {
-    props: {
-      title: '拖曳式 Modal',
-      content: '這是一個可拖曳的彈窗，可以移動位置',
-      showDragHandle: true,
-    },
-    drag: dragOptions.value.drag,
-    resize: dragOptions.value.resize,
-  })
-  console.log('Draggable Modal 開啟結果:', result)
-}
-
-// 3. 開啟可控制拖曳的 Modal
-const openModalWithDragControl = async () => {
-  const result = await modalManager.openPopover('test', {
-    props: {
-      title: '可控制拖曳的 Modal',
-      content: '使用下方按鈕來動態控制拖曳功能',
-      showDragHandle: true,
-    },
-    drag: false, // 初始不啟用拖曳
-  })
-
-  if (result.success) {
-    currentDragModalId.value = result.modalId
-  }
-}
-
-// 綁定拖曳
-const bindDrag = () => {
-  if (currentDragModalId.value) {
-    modalManager.bindDrag(currentDragModalId.value)
-    console.log('已綁定拖曳功能')
-  }
-}
-
-// 解除拖曳
-const unbindDrag = () => {
-  if (currentDragModalId.value) {
-    modalManager.unbindDrag(currentDragModalId.value)
-    console.log('已解除拖曳功能')
-  }
-}
-
-// 4. 開啟用於移動圖層的 Modal
-const openModalForLayerMove = async () => {
-  const result = await modalManager.openPopover('test', {
-    props: {
-      title: '圖層移動 Modal',
-      content: '這個 Modal 可以移動到不同的容器中',
-      showDragHandle: true,
-    },
-    drag: true,
-  })
-
-  if (result.success) {
-    layerMoveModalId.value = result.modalId
-  }
-}
-
-// 移動到容器1
-const moveToContainer1 = () => {
-  if (layerMoveModalId.value) {
-    modalManager.moveToLayers(layerMoveModalId.value, 'container1')
-    console.log('Modal 已移動到容器1')
-  }
-}
-
-// 移動到容器2
-const moveToContainer2 = () => {
-  if (layerMoveModalId.value) {
-    modalManager.moveToLayers(layerMoveModalId.value, 'container2')
-    console.log('Modal 已移動到容器2')
-  }
-}
-
-// 5. 開啟多個 Modal
-const openMultipleModals = async () => {
-  multipleModalIds.value = [] // 清空之前的記錄
-
-  for (let i = 1; i <= 3; i++) {
-    const result = await modalManager.openPopovers('test', {
+// 開啟固定modal
+const openFixedModal = async (direction: modalDirection) => {
+  try {
+    const result = await modalManager.openModal('test', 'fixed', {
+      direction,
       props: {
-        title: `拖曳式 Modal ${i}`,
-        content: `這是第 ${i} 個彈窗，可以拖曳移動`,
-        showDragHandle: true,
+        title: `固定modal - ${getDirectionName(direction)}`,
+        content: `這是一個 ${getDirectionName(direction)} 位置的固定modal示範`,
+        type: 'fixed',
+        position: direction,
       },
-      drag: true,
-      position: {
-        top: `${50 + i * 30}px`,
-        left: `${100 + i * 50}px`,
+      events: {
+        confirm: () => {
+          console.log(`固定modal (${direction}) 確認事件觸發`)
+        },
       },
     })
 
     if (result.success) {
-      multipleModalIds.value.push(result.modalId)
-      console.log(`Modal ${i} 開啟成功:`, result.modalId)
+      console.log(`成功開啟固定modal: ${result.modalId}`)
+    } else {
+      console.error(`開啟固定modal失敗: ${result.msg}`)
     }
+  } catch (error) {
+    console.error(`開啟固定modal異常: ${error}`)
   }
 }
 
-// 關閉特定 Modal
-const closeSpecificModal = (modalId: string) => {
-  modalManager.closeModal(modalId)
-  const index = multipleModalIds.value.indexOf(modalId)
-  if (index > -1) {
-    multipleModalIds.value.splice(index, 1)
+// 開啟可拖拽modal
+const openDraggableModal = async (options: Partial<draggableModalParams> = {}) => {
+  try {
+    const result = await modalManager.openModal('test', 'draggable', {
+      drag: options.drag || false,
+      resize: options.resize || false,
+      props: {
+        title: '可拖拽modal',
+        content: `拖拽: ${options.drag ? '啟用' : '禁用'}, 調整大小: ${options.resize ? '啟用' : '禁用'}`,
+        type: 'draggable',
+        showDragHandle: options.drag,
+        showResizeHandle: options.resize,
+      },
+      events: {
+        confirm: () => {
+          console.log('可拖拽modal確認事件觸發')
+        },
+        cancel: () => {
+          console.log('可拖拽modal取消事件觸發')
+        },
+      },
+    })
+
+    if (result.success) {
+      console.log(`成功開啟可拖拽modal: ${result.modalId}`)
+    } else {
+      console.error(`開啟可拖拽modal失敗: ${result.msg}`)
+    }
+  } catch (error) {
+    console.error(`開啟可拖拽modal異常: ${error}`)
   }
 }
 
-// 關閉所有 Modal
+// 開啟自訂位置modal
+const openCustomPositionModal = async () => {
+  try {
+    const result = await modalManager.openModal('test', 'draggable', {
+      position: {
+        top: '100px',
+        left: '100px',
+      },
+      props: {
+        title: '自訂位置modal',
+        content: '這個modal在自訂位置 (top: 100px, left: 100px)',
+        type: 'custom',
+      },
+    })
+
+    if (result.success) {
+      console.log(`成功開啟自訂位置modal: ${result.modalId}`)
+    }
+  } catch (error) {
+    console.error(`開啟自訂位置modal異常: ${error}`)
+  }
+}
+
+// 開啟帶自訂事件的modal
+const openModalWithEvents = async () => {
+  try {
+    const result = await modalManager.openModal('test', 'draggable', {
+      drag: true,
+      props: {
+        title: '自訂事件modal',
+        content: '這個modal有自訂事件處理功能',
+        type: 'events',
+        showDragHandle: true,
+      },
+      events: {
+        save: (data: any) => {
+          console.log(`儲存事件觸發，資料: ${JSON.stringify(data)}`)
+        },
+        delete: () => {
+          console.log('刪除事件觸發')
+        },
+        export: (format: string) => {
+          console.log(`匯出事件觸發，格式: ${format}`)
+        },
+      },
+    })
+
+    if (result.success) {
+      console.log(`成功開啟自訂事件modal: ${result.modalId}`)
+    }
+  } catch (error) {
+    console.error(`開啟自訂事件modal異常: ${error}`)
+  }
+}
+
+// 在指定容器中開啟modal
+const openModalInContainer = async () => {
+  try {
+    const result = await modalManager.openModal('test', 'draggable', {
+      id: 'custom-container',
+      drag: true,
+      props: {
+        title: '容器內modal',
+        content: '這個modal在自訂容器中開啟',
+        type: 'container',
+        showDragHandle: true,
+      },
+    })
+
+    if (result.success) {
+      console.log(`成功在容器中開啟modal: ${result.modalId}`)
+    }
+  } catch (error) {
+    console.error(`在容器中開啟modal異常: ${error}`)
+  }
+}
+
+// 開啟多個modal
+const openMultipleModals = async () => {
+  try {
+    const promises = []
+
+    // 開啟3個不同的modal
+    for (let i = 1; i <= 3; i++) {
+      promises.push(
+        modalManager.openModal('test', 'draggable', {
+          drag: true,
+          resize: i === 3,
+          position: {
+            top: `${50 + i * 60}px`,
+            left: `${50 + i * 60}px`,
+          },
+          props: {
+            title: `modal ${i}`,
+            content: `這是第 ${i} 個modal${i === 3 ? '，支援調整大小' : ''}`,
+            type: 'multiple',
+            index: i,
+            showDragHandle: true,
+            showResizeHandle: i === 3,
+          },
+        }),
+      )
+    }
+
+    const results = await Promise.all(promises)
+    const successCount = results.filter((r) => r.success).length
+
+    console.log(`成功開啟 ${successCount} 個modal`)
+  } catch (error) {
+    console.error(`開啟多個modal異常: ${error}`)
+  }
+}
+
+// 顯示modal列表
+const showModalList = () => {
+  const modals = modalManager.getOpenModals()
+
+  if (modals.length === 0) {
+    console.log('目前沒有開啟的modal')
+    return
+  }
+
+  const modalInfo = modals.map((modal) => ({
+    id: modal.id,
+    name: modal.name,
+    hasDrag: !!modal.drag,
+    hasResize: !!modal.resize,
+  }))
+
+  console.log(`目前開啟的modal: ${modalInfo.length} 個`)
+  console.log('modal詳細資訊:', modalInfo)
+}
+
+// 關閉所有modal
 const closeAllModals = () => {
-  modalManager.removeAllModal()
-  multipleModalIds.value = []
-  currentDragModalId.value = ''
-  layerMoveModalId.value = ''
-  console.log('所有 Modal 已關閉')
+  const count = modalManager.removeAllModal()
+  console.log(`成功關閉 ${count} 個modal`)
 }
 
+// 獲取方向名稱
+const getDirectionName = (direction: modalDirection): string => {
+  const nameMap = {
+    center: '居中',
+    top: '頂部',
+    bottom: '底部',
+    left: '左側',
+    right: '右側',
+  }
+  return nameMap[direction] || direction
+}
+
+// 生命週期
 onMounted(() => {
-  console.log('Modal Manager Demo 頁面已載入')
+  console.log('Modal Manager Demo 已載入')
+})
+
+onUnmounted(() => {
+  // 清理所有modal
+  modalManager.removeAllModal()
 })
 </script>
 
 <style scoped>
-.demo-container {
-  max-width: 1200px;
-  height: 100vh;
-  margin: 0 auto;
-  padding: 20px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  overflow-y: auto;
-}
-
-.demo-header {
-  width: 100%;
-  height: 150px;
-  text-align: center;
-  margin-bottom: 40px;
-  padding: 30px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-}
-
-.demo-header h1 {
-  margin: 0 0 10px 0;
-  font-size: 2.5rem;
-  font-weight: 700;
-}
-
-.demo-header p {
+/* 全局樣式 */
+* {
   margin: 0;
-  font-size: 1.1rem;
-  opacity: 0.9;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.demo-content {
-  width: 100%;
-  height: auto;
+.app-container {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background: #f8f9fa;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 30px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* 頁面標題 */
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 40px 0;
+  text-align: center;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.icon {
+  font-size: 2.5rem;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* 主要內容容器 (帶有 overflow) */
+.content-wrapper {
+  flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
-.demo-section {
+/* 主要內容 */
+.main-content {
+  padding: 40px 0;
+  min-height: 100%;
+}
+
+/* 控制面板 */
+.control-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 25px;
+  margin-bottom: 40px;
+}
+
+.panel-section {
   background: white;
+  padding: 25px;
   border-radius: 12px;
-  padding: 30px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e1e5e9;
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
 }
 
-.section-header h2 {
-  color: #2c3e50;
+.panel-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.section-title {
   margin: 0 0 8px 0;
-  font-size: 1.8rem;
+  color: #2c3e50;
+  font-size: 1.3rem;
   font-weight: 600;
 }
 
-.section-header p {
-  color: #6c757d;
+.section-description {
   margin: 0 0 20px 0;
-  font-size: 1rem;
+  color: #6c757d;
+  font-size: 0.95rem;
+  line-height: 1.4;
 }
 
-.demo-controls {
+.button-group {
   display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 25px;
   flex-wrap: wrap;
-}
-
-.checkbox-group {
-  display: flex;
-  gap: 15px;
-}
-
-.checkbox-group label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: #495057;
-  cursor: pointer;
-}
-
-.checkbox-group input[type='checkbox'] {
-  width: 16px;
-  height: 16px;
-  accent-color: #007bff;
-}
-
-.control-buttons {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .btn {
-  padding: 10px 20px;
+  padding: 12px 18px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  transition: all 0.3s ease;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  transition: all 0.2s ease;
+  min-width: 130px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn:hover::before {
+  left: 100%;
 }
 
 .btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+  transform: translateY(0);
 }
 
 .btn-primary {
-  background: #007bff;
+  background: linear-gradient(135deg, #3498db, #2980b9);
   color: white;
-}
-
-.btn-primary:hover {
-  background: #0056b3;
 }
 
 .btn-success {
-  background: #28a745;
+  background: linear-gradient(135deg, #27ae60, #229954);
   color: white;
-}
-
-.btn-success:hover {
-  background: #1e7e34;
 }
 
 .btn-warning {
-  background: #ffc107;
-  color: #212529;
-}
-
-.btn-warning:hover {
-  background: #d39e00;
+  background: linear-gradient(135deg, #f39c12, #e67e22);
+  color: white;
 }
 
 .btn-info {
-  background: #17a2b8;
+  background: linear-gradient(135deg, #17a2b8, #138496);
   color: white;
-}
-
-.btn-info:hover {
-  background: #117a8b;
-}
-
-.btn-purple {
-  background: #6f42c1;
-  color: white;
-}
-
-.btn-purple:hover {
-  background: #5a32a3;
-}
-
-.btn-danger {
-  background: #dc3545;
-  color: white;
-}
-
-.btn-danger:hover {
-  background: #bd2130;
 }
 
 .btn-secondary {
-  background: #6c757d;
+  background: linear-gradient(135deg, #6c757d, #5a6268);
   color: white;
 }
 
-.btn-secondary:hover {
-  background: #545b62;
+.btn-danger {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
 }
 
-.btn-sm {
-  padding: 6px 12px;
-  font-size: 12px;
+/* 示範容器區域 */
+.demo-container-section {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+  border: 1px solid #e9ecef;
 }
 
-.layer-containers {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin: 20px 0;
+.container-title {
+  margin: 0 0 8px 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
-.layer-container {
-  height: 500px;
-  padding: 20px;
-  border: 2px dashed #dee2e6;
-  border-radius: 8px;
+.container-description {
+  margin: 0 0 20px 0;
+  color: #6c757d;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.custom-container {
+  background: linear-gradient(135deg, #f1f3f4, #e8eaf6);
+  border: 2px dashed #9aa0a6;
+  border-radius: 12px;
+  padding: 40px 20px;
   text-align: center;
-  background: #f8f9fa;
-  min-height: 120px;
+  min-height: 500px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  position: relative;
+  transition: all 0.3s ease;
 }
 
-.layer-container h4 {
+.container-content {
+  position: relative;
+  z-index: 1;
+}
+
+.content-title {
   margin: 0 0 10px 0;
-  color: #495057;
+  color: #5f6368;
+  font-size: 1.3rem;
+  font-weight: 600;
 }
 
-.layer-container p {
-  margin: 0;
-  color: #6c757d;
-  font-size: 14px;
-}
-
-.modal-list {
-  background: #f8f9fa;
-  padding: 20px;
-  border-radius: 8px;
-  margin: 20px 0;
-}
-
-.modal-list h4 {
-  margin: 0 0 15px 0;
-  color: #495057;
-}
-
-.modal-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  background: white;
-  border-radius: 6px;
-  margin-bottom: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.modal-item span {
-  font-size: 14px;
-  color: #495057;
-  font-family: 'Courier New', monospace;
-}
-
-.code-example {
-  background: #f8f9fa;
-  border-left: 4px solid #007bff;
-  padding: 20px;
-  border-radius: 0 8px 8px 0;
-}
-
-.code-example h4 {
-  margin: 0 0 15px 0;
-  color: #495057;
-  font-size: 1.1rem;
-}
-
-.code-example pre {
-  background: #2d3748;
-  color: #e2e8f0;
-  padding: 20px;
-  border-radius: 6px;
-  overflow-x: auto;
-  margin: 0;
-  font-size: 13px;
+.content-text {
+  margin: 0 0 20px 0;
+  color: #80868b;
+  font-size: 1rem;
   line-height: 1.5;
 }
 
-.code-example code {
-  font-family: 'Fira Code', 'Courier New', monospace;
+/* 滾動條樣式 */
+.content-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+
+.content-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.content-wrapper::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #c1c1c1, #a8a8a8);
+  border-radius: 4px;
+}
+
+.content-wrapper::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #a8a8a8, #888);
 }
 
 /* 響應式設計 */
 @media (max-width: 768px) {
-  .demo-container {
-    padding: 15px;
-  }
-
-  .demo-header h1 {
+  .title {
     font-size: 2rem;
   }
 
-  .demo-section {
-    padding: 20px;
+  .subtitle {
+    font-size: 1rem;
   }
 
-  .layer-containers {
+  .control-panel {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
 
-  .demo-controls,
-  .control-buttons {
+  .button-group {
     flex-direction: column;
-    align-items: stretch;
   }
 
   .btn {
-    justify-content: center;
+    width: 100%;
+  }
+
+  .container {
+    padding: 0 15px;
+  }
+
+  .main-content {
+    padding: 20px 0;
+  }
+
+  .custom-container {
+    min-height: 200px;
+    padding: 20px 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.5rem;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .icon {
+    font-size: 2rem;
+  }
+
+  .section-title {
+    font-size: 1.1rem;
+  }
+
+  .btn {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+}
+
+/* 動畫效果 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.panel-section {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.panel-section:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.panel-section:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.panel-section:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.panel-section:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+.demo-container-section {
+  animation: fadeInUp 0.6s ease-out 0.5s both;
+}
+
+/* 特殊效果 */
+.custom-container::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #667eea, #764ba2, #667eea);
+  border-radius: 14px;
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.3s ease;
+}
+
+.custom-container:hover::before {
+  opacity: 0.1;
+  animation: borderGlow 2s infinite alternate;
+}
+
+@keyframes borderGlow {
+  0% {
+    opacity: 0.1;
+  }
+  100% {
+    opacity: 0.3;
+  }
+}
+
+/* 深色主題支持 */
+@media (prefers-color-scheme: dark) {
+  .app-container {
+    background: #1a1a1a;
+    color: #e9ecef;
+  }
+
+  .panel-section,
+  .demo-container-section {
+    background: #2d2d2d;
+    border-color: #404040;
+  }
+
+  .section-title,
+  .container-title {
+    color: #f8f9fa;
+  }
+
+  .section-description,
+  .container-description {
+    color: #adb5bd;
+  }
+
+  .custom-container {
+    background: linear-gradient(135deg, #3d3d3d, #4a4a4a);
+    border-color: #6c757d;
+  }
+
+  .content-title {
+    color: #f8f9fa;
+  }
+
+  .content-text {
+    color: #ced4da;
   }
 }
 </style>

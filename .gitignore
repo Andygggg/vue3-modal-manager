@@ -13,6 +13,7 @@ dist
 lib_dist
 dist-ssr
 coverage
+*.lock
 *.local
 
 /cypress/videos/
