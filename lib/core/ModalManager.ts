@@ -318,7 +318,7 @@ export class ModalManager {
       container.addEventListener('click', () => this.bringToFront(modalId))
 
       // 3. 處理容器載入
-      const success = this.mountContainer(container, params?.id)
+      const success = this.mountContainer(container, params?.id, params?.position)
       if (!success) {
         return { success: false, msg: 'Failed to mount container', modalId: '' }
       }
@@ -352,7 +352,11 @@ export class ModalManager {
   /**
    * 掛載容器至指定元素位置
    */
-  private mountContainer(container: HTMLElement, targetId?: string): boolean {
+  private mountContainer(
+    container: HTMLElement,
+    targetId?: string,
+    position?: modalPosition,
+  ): boolean {
     try {
       const box = targetId ? document.getElementById(targetId) : null
       if (box) {
@@ -362,9 +366,15 @@ export class ModalManager {
         document.body.appendChild(container)
       }
 
-      container.style.top = '50%'
-      container.style.left = '50%'
-      container.style.transform = 'translate(-50%, -50%)'
+      console.log(position)
+
+      if (position) {
+        this.applyCustomPosition(container, position)
+      } else {
+        container.style.top = '50%'
+        container.style.left = '50%'
+        container.style.transform = 'translate(-50%, -50%)'
+      }
 
       return true
     } catch (error) {
