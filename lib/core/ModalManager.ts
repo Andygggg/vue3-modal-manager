@@ -366,8 +366,6 @@ export class ModalManager {
         document.body.appendChild(container)
       }
 
-      console.log(position)
-
       if (position) {
         this.applyCustomPosition(container, position)
       } else {
